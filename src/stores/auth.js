@@ -7,15 +7,16 @@ export const useAuthStore = defineStore('auth', {
     isLoggedIn: false,
     user: null,
     token: null,
-    role: null
+    role: null,
+    userInfo: null // 存储用户详细信息
   }),
 
   getters: {
     userAvatar: (state) => {
-      return state.user?.avatar || '../assets/default-avatar.png'
+      return state.userInfo?.avatar || state.user?.avatar || '../assets/default-avatar.png'
     },
     userName: (state) => {
-      return state.user?.name || '游客'
+      return state.userInfo?.nickname || state.user?.name || '游客'
     },
     isAdmin: (state) => {
       return state.role === 'ADMIN'
@@ -37,10 +38,10 @@ export const useAuthStore = defineStore('auth', {
         this.token = token
         this.role = role
 
-        // 设置用户信息
+        // 设置用户基本信息
         this.user = {
           name: username,
-          avatar: '../assets/avatar.png' // 这里应该从API获取用户头像
+          avatar: '../assets/default-avatar.png'
         }
 
         // 保存到本地存储
@@ -58,6 +59,9 @@ export const useAuthStore = defineStore('auth', {
           }))
         }
 
+        // 登录成功后自动获取用户详细信息
+        await this.getUserInfo()
+
         return { success: true }
       } catch (error) {
         console.error('登录失败:', error)
@@ -68,11 +72,106 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    // 获取用户详细信息
+    async getUserInfo() {
+      try {
+        const response = await request.get(apiConfig.paths.user.getUserInfo)
+
+        // 请求成功，更新用户详细信息
+        this.userInfo = response.data
+
+        // 更新本地存储中的用户信息
+        const storage = localStorage.getItem('token') ? localStorage : sessionStorage
+        const savedUser = storage.getItem('user')
+
+        if (savedUser) {
+          const userData = JSON.parse(savedUser)
+          userData.userInfo = this.userInfo
+          storage.setItem('user', JSON.stringify(userData))
+        }
+
+        return { success: true, data: this.userInfo }
+      } catch (error) {
+        console.error('获取用户信息失败:', error)
+        return {
+          success: false,
+          message: error.message || '获取用户信息失败'
+        }
+      }
+    },
+
+    // 更新用户信息
+    async updateUserInfo(userInfo) {
+      try {
+        const response = await request.put(apiConfig.paths.user.updateUserInfo, userInfo)
+
+        // 请求成功，更新用户详细信息
+        this.userInfo = response.data
+
+        // 更新本地存储中的用户信息
+        const storage = localStorage.getItem('token') ? localStorage : sessionStorage
+        const savedUser = storage.getItem('user')
+
+        if (savedUser) {
+          const userData = JSON.parse(savedUser)
+          userData.userInfo = this.userInfo
+          storage.setItem('user', JSON.stringify(userData))
+        }
+
+        return { success: true, data: this.userInfo }
+      } catch (error) {
+        console.error('更新用户信息失败:', error)
+        return {
+          success: false,
+          message: error.message || '更新用户信息失败'
+        }
+      }
+    },
+
+    // 修改密码
+    async changePassword(oldPassword, newPassword) {
+      try {
+        const response = await request.post(apiConfig.paths.user.changePassword, {
+          oldPassword,
+          newPassword
+        })
+
+        return { success: true, message: '密码修改成功' }
+      } catch (error) {
+        console.error('修改密码失败:', error)
+        return {
+          success: false,
+          message: error.message || '修改密码失败'
+        }
+      }
+    },
+
+    // 上传头像
+    async uploadAvatar(formData) {
+      try {
+        const response = await request.upload(apiConfig.paths.user.uploadAvatar, formData)
+
+        // 更新用户头像
+        if (this.userInfo) {
+          this.userInfo.avatar = response.data.avatarUrl
+        }
+
+        return { success: true, data: response.data }
+      } catch (error) {
+        console.error('上传头像失败:', error)
+        return {
+          success: false,
+          message: error.message || '上传头像失败'
+        }
+      }
+    },
+
     logout() {
       this.isLoggedIn = false
       this.user = null
       this.token = null
       this.role = null
+      this.userInfo = null
 
       // 清除存储
       localStorage.removeItem('token')
@@ -94,7 +193,15 @@ export const useAuthStore = defineStore('auth', {
           this.role = userData.role
           this.user = {
             name: userData.name,
-            avatar: '../assets/avatar.png' // 这里应该从API获取用户头像
+            avatar: '../assets/default-avatar.png'
+          }
+
+          // 如果本地存储中有用户详细信息，则加载
+          if (userData.userInfo) {
+            this.userInfo = userData.userInfo
+          } else {
+            // 否则，自动获取用户详细信息
+            this.getUserInfo()
           }
 
           return true
@@ -112,6 +219,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.token = null
       this.role = null
+      this.userInfo = null
 
       localStorage.removeItem('token')
       localStorage.removeItem('user')

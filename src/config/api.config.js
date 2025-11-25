@@ -35,8 +35,11 @@ const API_PATHS = {
   },
   user: {
     profile: '/api/user/profile',
+    getUserInfo: '/api/user/info', // 获取用户详细信息
     updateProfile: '/api/user/profile',
-    changePassword: '/api/user/change-password'
+    updateUserInfo: '/api/user/info', // 更新用户详细信息
+    changePassword: '/api/user/change-password',
+    uploadAvatar: '/api/user/avatar' // 上传用户头像
   },
   posts: {
     list: '/api/posts',

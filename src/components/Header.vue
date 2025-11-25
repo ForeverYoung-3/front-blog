@@ -51,7 +51,7 @@
                @mouseleave="handleMouseLeave">
             <img :src="authStore.userAvatar" alt="用户头像" class="avatar" @click="toggleDropdown" />
             <div class="dropdown-content" v-show="showDropdown" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
-              <router-link to="/profile" class="dropdown-item" @click="showDropdown = false">个人中心</router-link>
+              <a href="#" class="dropdown-item" @click.prevent="showProfileModal = true; showDropdown = false">个人中心</a>
               <router-link to="/settings" class="dropdown-item" @click="showDropdown = false">设置</router-link>
               <!-- 管理员角色显示管理后台入口 -->
               <router-link v-if="authStore.isAdmin" to="/admin" class="dropdown-item admin-link" @click="showDropdown = false">
@@ -68,6 +68,13 @@
         </router-link>
       </div>
     </div>
+
+    <!-- 个人信息修改弹窗 -->
+    <ProfileModal
+      :show="showProfileModal"
+      @close="showProfileModal = false"
+      @update="handleProfileUpdate"
+    />
   </header>
 </template>
 
@@ -75,6 +82,7 @@
 import { ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
+import ProfileModal from './ProfileModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -84,6 +92,8 @@ authStore.checkAuth()
 
 // 控制下拉菜单显示
 const showDropdown = ref(false)
+// 控制个人信息弹窗显示
+const showProfileModal = ref(false)
 let closeTimer = null
 
 // 鼠标进入头像或下拉菜单
@@ -107,6 +117,12 @@ const handleMouseLeave = () => {
 // 点击头像切换下拉菜单显示状态
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
+}
+
+// 处理个人信息更新
+const handleProfileUpdate = () => {
+  // 可以在这里添加一些额外的操作，比如显示通知等
+  console.log('个人信息已更新')
 }
 
 const handleLogout = () => {
