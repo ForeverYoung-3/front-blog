@@ -1,0 +1,296 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================
+   Hero Banner
+   ===================================================== */
+
+.hero-banner {
+  position: relative;
+  /* 高度 = 内容区 + 波浪高度，波浪高度 80px */
+  padding-bottom: 80px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #1a7ab5 0%, #22a5cc 30%, #3ec6c0 60%, #6ecfa8 100%);
+  background-size: 200% 200%;
+  animation: hero-gradient 10s ease infinite alternate;
+}
+
+@keyframes hero-gradient {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* ----- SVG 波浪容器 ----- */
+.hero-wave-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  pointer-events: none;
+}
+
+.hero-wave-svg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 两层动画波浪，错开相位 */
+.wave-anim-1 {
+  z-index: 1;
+  animation: wave-shift1 3.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.wave-anim-2 {
+  z-index: 2;
+  animation: wave-shift2 4.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes wave-shift1 {
+  0%, 100% { transform: translateX(0); }
+  50%       { transform: translateX(-3%); }
+}
+
+@keyframes wave-shift2 {
+  0%, 100% { transform: translateX(0); }
+  50%       { transform: translateX(3%); }
+}
+
+/* ----- 气泡 ----- */
+.bubble {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: bubble-rise linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes bubble-rise {
+  0%   { transform: translateY(0) scale(1);   opacity: 0; }
+  10%  { opacity: 0.5; }
+  85%  { opacity: 0.2; }
+  100% { transform: translateY(-380px) scale(1.15); opacity: 0; }
+}
+
+/* ----- 花瓣飘落 ----- */
+.petal {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(ellipse, #ffb7c5 40%, rgba(255,183,197,0) 100%);
+  border-radius: 50% 0 50% 0;
+  animation: petal-fall linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes petal-fall {
+  0%   { transform: translateY(-30px) translateX(0) rotate(0deg);   opacity: 0; }
+  8%   { opacity: 0.9; }
+  85%  { opacity: 0.5; }
+  100% { transform: translateY(460px) translateX(50px) rotate(400deg); opacity: 0; }
+}
+
+/* =====================================================
+   文字入场动效
+   ===================================================== */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up        { animation: fade-up 0.7s ease-out both; }
+.animate-fade-up-delay  { animation: fade-up 0.7s ease-out 0.18s both; }
+.animate-fade-up-delay2 { animation: fade-up 0.7s ease-out 0.36s both; }
+
+/* =====================================================
+   卡片滑入
+   ===================================================== */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up { animation: slide-up 0.45s ease-out both; }
+
+/* =====================================================
+   Post Card
+   ===================================================== */
+.post-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
+}
+.post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
+}
+
+/* =====================================================
+   作者卡片
+   ===================================================== */
+.author-card {
+  transition: box-shadow 0.25s ease;
+}
+.author-card:hover {
+  box-shadow: 0 8px 28px rgba(99, 102, 241, 0.13);
+}
+
+/* =====================================================
+   Markdown 内容
+   ===================================================== */
+.markdown-body { @apply text-gray-800 leading-relaxed; }
+.markdown-body h1 { @apply text-3xl font-bold mt-8 mb-4 text-gray-900; }
+.markdown-body h2 { @apply text-2xl font-bold mt-6 mb-3 text-gray-900; }
+.markdown-body h3 { @apply text-xl font-semibold mt-5 mb-2 text-gray-900; }
+.markdown-body p  { @apply mb-4; }
+.markdown-body a  { @apply text-indigo-600 hover:text-indigo-800 underline; }
+.markdown-body ul { @apply list-disc list-inside mb-4 space-y-1; }
+.markdown-body ol { @apply list-decimal list-inside mb-4 space-y-1; }
+.markdown-body blockquote {
+  @apply border-l-4 border-indigo-400 pl-4 italic text-gray-600 my-4;
+}
+.markdown-body pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto my-4 text-sm;
+}
+.markdown-body code {
+  @apply bg-gray-100 text-indigo-700 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+.markdown-body pre code { @apply bg-transparent text-gray-100 p-0; }
+.markdown-body table   { @apply w-full border-collapse my-4; }
+.markdown-body th { @apply bg-gray-100 border border-gray-300 px-4 py-2 text-left font-semibold; }
+.markdown-body td { @apply border border-gray-300 px-4 py-2; }
+.markdown-body img { @apply max-w-full rounded-lg my-4; }
+.markdown-body hr  { @apply border-gray-200 my-8; }
+
+/* =====================================================
+   ByteMD 编辑器
+   ===================================================== */
+.bytemd-wrapper .bytemd {
+  height: 520px;
+  border-radius: 8px;
+  border-color: #e5e7eb;
+  font-family: inherit;
+}
+.bytemd-wrapper .bytemd:focus-within {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.bytemd-wrapper .bytemd-toolbar {
+  border-radius: 8px 8px 0 0;
+  background: #f9fafb;
+  border-bottom-color: #e5e7eb;
+}
+.bytemd-wrapper .bytemd-editor  { font-size: 14px; line-height: 1.8; }
+.bytemd-wrapper .bytemd-preview { font-size: 14px; line-height: 1.8; padding: 16px 20px; }
+
+/* =====================================================
+   文章阅读页 — ByteMD Viewer 正文
+   ===================================================== */
+
+/* 重置 ByteMD 默认的 border / padding，由外层卡片控制 */
+.post-content .bytemd-viewer {
+  padding: 0;
+  font-size: 16px;
+  line-height: 1.85;
+  color: #374151;
+}
+
+/* 标题增加锚点偏移，避免被固定导航栏遮住 */
+.post-content .bytemd-viewer h1,
+.post-content .bytemd-viewer h2,
+.post-content .bytemd-viewer h3,
+.post-content .bytemd-viewer h4 {
+  scroll-margin-top: 88px;
+}
+
+.post-content .bytemd-viewer h1 { font-size: 1.75rem; font-weight: 700; margin: 2rem 0 1rem; color: #111827; }
+.post-content .bytemd-viewer h2 { font-size: 1.4rem;  font-weight: 700; margin: 1.6rem 0 0.8rem; color: #111827; }
+.post-content .bytemd-viewer h3 { font-size: 1.15rem; font-weight: 600; margin: 1.3rem 0 0.6rem; color: #1f2937; }
+.post-content .bytemd-viewer p  { margin-bottom: 1rem; }
+
+.post-content .bytemd-viewer a {
+  color: #4f46e5;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.post-content .bytemd-viewer a:hover { color: #3730a3; }
+
+.post-content .bytemd-viewer ul { list-style: disc;    padding-left: 1.5rem; margin-bottom: 1rem; }
+.post-content .bytemd-viewer ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+.post-content .bytemd-viewer li { margin-bottom: 0.3rem; }
+
+.post-content .bytemd-viewer blockquote {
+  border-left: 4px solid #818cf8;
+  padding: 0.4rem 1rem;
+  margin: 1.2rem 0;
+  color: #6b7280;
+  font-style: italic;
+  background: #f5f3ff;
+  border-radius: 0 8px 8px 0;
+}
+
+.post-content .bytemd-viewer pre {
+  background: #1e2433;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1.2rem 0;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.post-content .bytemd-viewer pre code {
+  background: transparent;
+  color: #e2e8f0;
+  padding: 0;
+}
+.post-content .bytemd-viewer :not(pre) > code {
+  background: #f1f0fe;
+  color: #4f46e5;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: ui-monospace, monospace;
+}
+
+.post-content .bytemd-viewer table   { width: 100%; border-collapse: collapse; margin: 1.2rem 0; }
+.post-content .bytemd-viewer th { background: #f9fafb; border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; font-weight: 600; text-align: left; }
+.post-content .bytemd-viewer td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; }
+.post-content .bytemd-viewer tr:hover td { background: #f9fafb; }
+
+.post-content .bytemd-viewer img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
+.post-content .bytemd-viewer hr  { border-color: #e5e7eb; margin: 2rem 0; }
+
+/* =====================================================
+   目录侧边栏
+   ===================================================== */
+
+.toc-sidebar {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb transparent;
+}
+.toc-sidebar::-webkit-scrollbar { width: 3px; }
+.toc-sidebar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+
+/* 激活目录条目左侧竖线指示器 */
+.toc-item {
+  border-left: 2px solid transparent;
+  padding-left: 8px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.toc-item.toc-active {
+  border-left-color: #4f46e5;
+}
