@@ -1,9 +1,9 @@
 # ---- Build Stage ----
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 WORKDIR /app
 # 先复制依赖文件，利用缓存层
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 # 复制源码构建
 COPY . .
 # 构建时注入后端 API 地址（由 docker-compose 或 CI 传入）
