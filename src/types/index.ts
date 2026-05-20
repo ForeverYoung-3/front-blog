@@ -114,6 +114,16 @@ export interface PostRequest {
 }
 
 // ---- 管理员统计 ----
+export interface RecentPost {
+  id: number;
+  title: string;
+  slug: string;
+  status: string;
+  viewCount: number;
+  publishedAt: string | null;
+  createdAt: string | null;
+}
+
 export interface AdminStats {
   totalUsers: number;
   totalPosts: number;
@@ -122,6 +132,7 @@ export interface AdminStats {
   archivedPosts: number;
   totalTags: number;
   totalViews: number;
+  recentPosts?: RecentPost[];
 }
 
 // ---- 公开统计（首页作者卡片：无需登录） ----
