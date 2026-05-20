@@ -55,6 +55,7 @@ export default function DashboardPage() {
   const { data: stats } = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: adminApi.getStats,
+    staleTime: 0,
   });
 
   const s = stats ?? EMPTY_STATS;
