@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import { usersApi } from '../../api/users';
 import ImageUpload from '../../components/common/ImageUpload';
@@ -8,6 +8,7 @@ type Tab = 'info' | 'password';
 
 export default function ProfilePage() {
   const { user, login } = useAuthStore();
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('info');
 
   // 从后端拉取完整用户信息（含 bio、email 等 store 里没有的字段）
@@ -54,11 +55,18 @@ export default function ProfilePage() {
     try {
       const res = await usersApi.updateMe({
         nickname: infoForm.nickname,
-        avatar: infoForm.avatar,
+        avatar: infoForm.avatar || undefined,
         bio: infoForm.bio,
         email: infoForm.email || undefined,
       });
-      // 更新本地 store
+      // 同步更新表单数据（防止再次保存时数据不一致）
+      setInfoForm({
+        nickname: res.nickname || '',
+        avatar: res.avatar || '',
+        bio: res.bio || '',
+        email: res.email || '',
+      });
+      // 更新本地 store（nickname、avatar 会显示在导航栏）
       if (user) {
         login({
           accessToken: useAuthStore.getState().token!,
@@ -70,6 +78,8 @@ export default function ProfilePage() {
           role: user.role,
         });
       }
+      // 刷新 React Query 缓存，确保下次进入页面数据是最新的
+      queryClient.setQueryData(['users-me'], res);
       setInfoMsg({ type: 'ok', text: '保存成功！' });
     } catch (err: unknown) {
       setInfoMsg({ type: 'err', text: err instanceof Error ? err.message : '保存失败' });
@@ -116,11 +126,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="max-w-xl mx-auto px-0 sm:px-0">
       <h2 className="text-xl font-bold text-gray-800 mb-6">个人信息</h2>
 
       {/* 头像预览卡片 */}
-      <div className="flex items-center gap-4 mb-8 p-5 bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-8 p-5 bg-white rounded-2xl shadow-sm border border-gray-100 text-center sm:text-left">
         <div className="flex-shrink-0">
           <ImageUpload
             value={infoForm.avatar || undefined}
@@ -145,12 +155,12 @@ export default function ProfilePage() {
       </div>
 
       {/* Tab 切换 */}
-      <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 w-fit">
+      <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 w-full sm:w-fit">
         {([['info', '基本信息'], ['password', '修改密码']] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`px-5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 sm:flex-none px-5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
               tab === key
                 ? 'bg-white text-indigo-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'

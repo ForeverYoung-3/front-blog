@@ -10,10 +10,10 @@ export default function TagsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">🏷️ 所有标签</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">🏷️ 所有标签</h1>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="bg-white rounded-xl p-4 animate-pulse">
               <div className="h-5 bg-gray-200 rounded w-1/2 mb-2" />
@@ -22,7 +22,7 @@ export default function TagsPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {tags?.map(tag => (
             <Link
               key={tag.id}

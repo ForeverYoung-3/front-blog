@@ -189,11 +189,37 @@ export default function HomePage() {
   const totalElements = postsData?.totalElements ?? MOCK_POSTS.length;
   const isMock = !postsData?.content?.length;
 
+  // 右侧边栏内容（复用于桌面右列 & 移动端底部）
+  const SidebarContent = () => (
+    <>
+      <AuthorCard tags={tags} stats={blogStats} />
+      <div className="bg-white rounded-2xl shadow-md p-5 animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3 font-medium">
+          <span>🔥</span> 热门文章
+        </div>
+        <div className="space-y-3">
+          {posts.slice(0, 4).map((post, i) => (
+            <Link key={post.id} to={`/post/${post.slug}`} className="flex items-start gap-2 group">
+              <span className={`w-5 h-5 rounded text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5 ${
+                i === 0 ? 'bg-red-500 text-white' :
+                i === 1 ? 'bg-orange-400 text-white' :
+                i === 2 ? 'bg-yellow-400 text-white' :
+                'bg-gray-200 text-gray-500'
+              }`}>{i + 1}</span>
+              <span className="text-xs text-gray-600 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-relaxed">
+                {post.title}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
   return (
-    <div className="flex gap-6 items-start">
-      {/* ===== 左侧主内容 ===== */}
+    <div className="lg:flex lg:gap-6 lg:items-start">
+      {/* ===== 主内容 ===== */}
       <div className="flex-1 min-w-0">
-        {/* 最新文章标题 */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <span className="w-1 h-5 bg-indigo-500 rounded-full inline-block" />
@@ -207,9 +233,9 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* 文章网格 */}
+        {/* 文章网格：移动端单列，sm 双列，桌面（边栏存在时）双列 */}
         {postsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="bg-white rounded-xl overflow-hidden animate-pulse">
                 <div className="h-40 bg-gray-200" />
@@ -222,13 +248,9 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {posts.map((post, idx) => (
-              <div
-                key={post.id}
-                className="animate-slide-up"
-                style={{ animationDelay: `${idx * 60}ms` }}
-              >
+              <div key={post.id} className="animate-slide-up" style={{ animationDelay: `${idx * 60}ms` }}>
                 <PostCard post={post} />
               </div>
             ))}
@@ -238,47 +260,19 @@ export default function HomePage() {
         {/* 分页 */}
         {!isMock && postsData && (
           <div className="mt-8">
-            <Pagination
-              current={page}
-              total={totalElements}
-              pageSize={9}
-              onChange={setPage}
-            />
+            <Pagination current={page} total={totalElements} pageSize={9} onChange={setPage} />
           </div>
         )}
+
+        {/* 移动端边栏：文章列表下方 */}
+        <div className="lg:hidden mt-8">
+          <SidebarContent />
+        </div>
       </div>
 
-      {/* ===== 右侧边栏 ===== */}
+      {/* ===== 右侧边栏（仅 lg+） ===== */}
       <aside className="w-60 hidden lg:block flex-shrink-0">
-        <AuthorCard tags={tags} stats={blogStats} />
-
-        {/* 热门文章 */}
-        <div className="bg-white rounded-2xl shadow-md p-5 animate-slide-up" style={{ animationDelay: '100ms' }}>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3 font-medium">
-            <span>🔥</span> 热门文章
-          </div>
-          <div className="space-y-3">
-            {posts.slice(0, 4).map((post, i) => (
-              <Link
-                key={post.id}
-                to={`/post/${post.slug}`}
-                className="flex items-start gap-2 group"
-              >
-                <span className={`w-5 h-5 rounded text-xs font-bold flex-shrink-0 flex items-center justify-center mt-0.5 ${
-                  i === 0 ? 'bg-red-500 text-white' :
-                  i === 1 ? 'bg-orange-400 text-white' :
-                  i === 2 ? 'bg-yellow-400 text-white' :
-                  'bg-gray-200 text-gray-500'
-                }`}>
-                  {i + 1}
-                </span>
-                <span className="text-xs text-gray-600 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-relaxed">
-                  {post.title}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <SidebarContent />
       </aside>
     </div>
   );

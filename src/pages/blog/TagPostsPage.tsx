@@ -29,10 +29,10 @@ export default function TagPostsPage() {
         {tag && (
           <div className="flex items-center gap-3 mt-3">
             <span
-              className="w-4 h-4 rounded-full"
+              className="w-4 h-4 rounded-full flex-shrink-0"
               style={{ backgroundColor: tag.color }}
             />
-            <h1 className="text-2xl font-bold text-gray-900">{tag.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{tag.name}</h1>
             <span className="text-gray-400 text-sm">({tag.postCount} 篇)</span>
           </div>
         )}

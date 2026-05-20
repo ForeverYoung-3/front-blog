@@ -20,8 +20,8 @@ export default function SearchPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">
-        搜索结果：<span className="text-indigo-600">"{keyword}"</span>
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+        搜索结果：<span className="text-indigo-600 break-all">"{keyword}"</span>
       </h1>
       {postsData && (
         <p className="text-gray-500 text-sm mb-6">共找到 {postsData.totalElements} 篇文章</p>

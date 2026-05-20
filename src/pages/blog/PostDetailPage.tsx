@@ -31,11 +31,62 @@ function extractToc(md: string): TocItem[] {
     if (!m) continue;
     const level = m[1].length;
     const text = m[2].trim();
-    // slug() 会处理去重（重复标题自动加 -1 -2 后缀），与 rehype-slug 行为一致
     const id = slugger.slug(text);
     items.push({ level, text, id });
   }
   return items;
+}
+
+// ---- 移动端折叠目录（仅 lg 以下可见） ----
+function MobileToc({ toc, activeId, onScroll }: {
+  toc: TocItem[];
+  activeId: string;
+  onScroll: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const active = toc.find(t => t.id === activeId);
+
+  return (
+    <div className="lg:hidden mb-4 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* 折叠触发行 */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <svg className="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M4 6h16M4 10h10M4 14h12M4 18h8" />
+          </svg>
+          <span className="font-medium text-gray-700">目录</span>
+          {active && !open && (
+            <span className="text-xs text-indigo-500 truncate ml-1">· {active.text}</span>
+          )}
+        </div>
+        <svg className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {/* 展开内容 */}
+      {open && (
+        <div className="border-t border-gray-100 px-4 py-3 space-y-0.5 max-h-60 overflow-y-auto">
+          {toc.map(item => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              onClick={e => { e.preventDefault(); onScroll(item.id); setOpen(false); }}
+              className={`block text-sm py-1.5 transition-colors ${
+                item.level === 1 ? 'pl-0' : item.level === 2 ? 'pl-4' : 'pl-8'
+              } ${activeId === item.id ? 'text-indigo-600 font-medium' : 'text-gray-500 hover:text-gray-800'}`}
+            >
+              {item.text}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function PostDetailPage() {
@@ -103,24 +154,57 @@ export default function PostDetailPage() {
       })
     : '';
 
-  return (
-    <div className="max-w-6xl mx-auto px-4">
-      <div className="flex gap-8 items-start">
+  // 目录点击跳转
+  const scrollToHeading = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+      setActiveId(id);
+    }
+  };
 
+  // 目录导航（复用）
+  const TocNav = ({ onClickItem }: { onClickItem?: () => void }) => (
+    <nav className="space-y-0.5">
+      {toc.map(item => (
+        <a
+          key={item.id}
+          href={`#${item.id}`}
+          onClick={e => {
+            e.preventDefault();
+            scrollToHeading(item.id);
+            onClickItem?.();
+          }}
+          className={`toc-item block text-sm leading-snug py-1 transition-colors duration-150 ${
+            item.level === 1 ? 'pl-0' : item.level === 2 ? 'pl-3' : 'pl-6'
+          } ${activeId === item.id ? 'text-indigo-600 font-medium toc-active' : 'text-gray-500 hover:text-gray-800'}`}
+        >
+          {item.text}
+        </a>
+      ))}
+    </nav>
+  );
+
+  return (
+    <div className="max-w-6xl mx-auto px-3 md:px-4">
+
+      {/* 移动端折叠目录（仅 lg 以下，且有目录时展示） */}
+      {toc.length > 0 && (
+        <MobileToc toc={toc} activeId={activeId} onScroll={scrollToHeading} />
+      )}
+
+      <div className="lg:flex lg:gap-8 lg:items-start">
         {/* ======= 主内容区 ======= */}
         <article className="flex-1 min-w-0">
-          {/* 文章头部 */}
-          <header className="mb-8">
+          <header className="mb-6 md:mb-8">
             {post.coverImage && (
-              <img
-                src={post.coverImage}
-                alt={post.title}
-                className="w-full h-64 object-cover rounded-2xl mb-6"
-              />
+              <img src={post.coverImage} alt={post.title}
+                className="w-full h-48 md:h-64 object-cover rounded-xl md:rounded-2xl mb-4 md:mb-6" />
             )}
-            <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-snug">{post.title}</h1>
-
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4 leading-snug">
+              {post.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-3">
               {post.authorAvatar && (
                 <img src={post.authorAvatar} alt="" className="w-6 h-6 rounded-full object-cover" />
               )}
@@ -128,68 +212,32 @@ export default function PostDetailPage() {
               {publishDate && <span>📅 {publishDate}</span>}
               <span>👁 {post.viewCount} 次阅读</span>
             </div>
-
             <div className="flex flex-wrap gap-2">
               {post.tags.map(tag => (
-                <Link
-                  key={tag.id}
-                  to={`/tag/${tag.slug}`}
+                <Link key={tag.id} to={`/tag/${tag.slug}`}
                   className="text-xs px-2.5 py-1 rounded-full text-white hover:opacity-80 transition-opacity"
-                  style={{ backgroundColor: tag.color }}
-                >
+                  style={{ backgroundColor: tag.color }}>
                   {tag.name}
                 </Link>
               ))}
             </div>
           </header>
 
-          {/* Markdown 正文：ByteMD Viewer 渲染，保持与编辑器一致 */}
-          <div
-            ref={contentRef}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 post-content"
-          >
+          <div ref={contentRef} className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 p-4 md:p-8 post-content">
             <Viewer value={post.content ?? ''} plugins={plugins} />
           </div>
 
-          {/* 底部导航 */}
-          <div className="mt-8 pb-16">
+          <div className="mt-6 md:mt-8 pb-12 md:pb-16">
             <Link to="/" className="text-indigo-600 hover:text-indigo-800 text-sm">← 返回文章列表</Link>
           </div>
         </article>
 
-        {/* ======= 目录侧边栏 ======= */}
+        {/* 桌面端目录侧边栏 */}
         {toc.length > 0 && (
           <aside className="toc-sidebar hidden lg:block w-56 flex-shrink-0 sticky top-24 self-start">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">目录</p>
-              <nav className="space-y-0.5">
-                {toc.map(item => (
-                  <a
-                    key={item.id}
-                    href={`#${item.id}`}
-                    onClick={e => {
-                      e.preventDefault();
-                      const el = document.getElementById(item.id);
-                      if (el) {
-                        const offset = 80;
-                        const top = el.getBoundingClientRect().top + window.scrollY - offset;
-                        window.scrollTo({ top, behavior: 'smooth' });
-                        setActiveId(item.id);
-                      }
-                    }}
-                    className={`toc-item block text-sm leading-snug py-1 transition-colors duration-150 ${
-                      item.level === 1 ? 'pl-0' :
-                      item.level === 2 ? 'pl-3' : 'pl-6'
-                    } ${
-                      activeId === item.id
-                        ? 'text-indigo-600 font-medium toc-active'
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    {item.text}
-                  </a>
-                ))}
-              </nav>
+              <TocNav />
             </div>
           </aside>
         )}

@@ -26,8 +26,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
+      <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">登录</h1>
 
         {error && (
