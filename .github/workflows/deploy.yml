@@ -16,14 +16,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          cache: 'npm'
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm install --include=dev
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
         env:
           VITE_API_BASE_URL: /api
 
@@ -45,11 +49,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           command_timeout: 10m
           script: |
-            # 用已构建好的 dist 替换服务器上的目录
             mkdir -p ~/front-blog
             cp -r ~/front-blog-dist/dist ~/front-blog/dist
             cp ~/front-blog-dist/nginx.conf ~/front-blog/nginx.conf
-            # 写一个简单 Dockerfile，只需 nginx + 静态文件
             cat > ~/front-blog/Dockerfile << 'EOF'
             FROM nginx:1.25-alpine
             COPY dist /usr/share/nginx/html
