@@ -6,7 +6,21 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const menuGroups = [
+interface MenuItem {
+  path: string;
+  label: string;
+  icon: React.ReactElement;
+  exact?: boolean;
+  adminOnly?: boolean;
+}
+
+interface MenuGroup {
+  title: string;
+  adminOnly?: boolean;
+  items: MenuItem[];
+}
+
+const menuGroups: MenuGroup[] = [
   {
     title: '内容管理',
     items: [
