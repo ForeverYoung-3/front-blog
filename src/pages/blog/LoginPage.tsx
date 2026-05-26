@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { useAuthStore } from '../../store/authStore';
 
@@ -9,6 +9,10 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const { login } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // 登录成功后回跳到来源页（token 过期时由 request.ts 带过来）
+  const redirect = searchParams.get('redirect') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +21,7 @@ export default function LoginPage() {
     try {
       const auth = await authApi.login(form.username, form.password);
       login(auth);
-      navigate('/');
+      navigate(redirect, { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '登录失败');
     } finally {
@@ -29,6 +33,14 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">登录</h1>
+
+        {/* token 过期时提示 */}
+        {searchParams.get('redirect') && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg px-4 py-3 mb-4 text-sm flex items-center gap-2">
+            <span>⚠️</span>
+            <span>登录已过期，请重新登录后继续操作</span>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-3 mb-4 text-sm">

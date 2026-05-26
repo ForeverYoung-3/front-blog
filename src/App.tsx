@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import BlogLayout from './components/layout/BlogLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { ToastContainer } from './components/common/Toast';
 
 // Blog pages
 import HomePage from './pages/blog/HomePage';
@@ -35,6 +36,7 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <ToastContainer />
       <BrowserRouter>
         <Routes>
           {/* 认证页面（无 Layout） */}
