@@ -5,7 +5,15 @@ import { useAuthStore } from '../../store/authStore';
 import type { RecentPost } from '../../types';
 
 // 统计数据兜底（仅在接口未返回时显示）
-const EMPTY_STATS = {
+const EMPTY_STATS: {
+  totalUsers: number;
+  totalPosts: number;
+  publishedPosts: number;
+  draftPosts: number;
+  totalTags: number;
+  totalViews: number;
+  recentPosts: RecentPost[];
+} = {
   totalUsers: 0,
   totalPosts: 0,
   publishedPosts: 0,
@@ -59,10 +67,9 @@ export default function DashboardPage() {
     staleTime: 0,
   });
 
-  // 防御性处理：兼容 undefined / null / 缺字段等所有情况
   const s = stats ?? EMPTY_STATS;
-  const totalViews: number = (s.totalViews as number | undefined) ?? 0;
-  const recentPosts: RecentPost[] = (s.recentPosts as RecentPost[] | undefined) ?? [];
+  const totalViews = s.totalViews ?? 0;
+  const recentPosts = s.recentPosts ?? [];
 
   // 获取当前时间段问候语
   const hour = new Date().getHours();
@@ -140,7 +147,7 @@ export default function DashboardPage() {
           />
           <StatCard
             label="总浏览量"
-            value={totalViews >= 1000 ? `${(totalViews / 1000).toFixed(1)}k` : totalViews}
+            value={totalViews}
             gradient="bg-gradient-to-br from-red-400 to-rose-500"
             icon={<svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>}
           />
