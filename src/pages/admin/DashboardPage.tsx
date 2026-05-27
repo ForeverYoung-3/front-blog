@@ -53,12 +53,6 @@ function StatCard({ label, value, icon, gradient, trend }: StatCardProps) {
   );
 }
 
-const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  PUBLISHED: { label: '已发布', cls: 'bg-green-100 text-green-700' },
-  DRAFT:     { label: '草稿',   cls: 'bg-yellow-100 text-yellow-700' },
-  ARCHIVED:  { label: '已归档', cls: 'bg-gray-100 text-gray-500' },
-};
-
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { data: stats } = useQuery({
@@ -68,8 +62,6 @@ export default function DashboardPage() {
   });
 
   const s = stats ?? EMPTY_STATS;
-  const totalViews = s.totalViews ?? 0;
-  const recentPosts = s.recentPosts ?? [];
 
   // 获取当前时间段问候语
   const hour = new Date().getHours();
@@ -147,7 +139,7 @@ export default function DashboardPage() {
           />
           <StatCard
             label="总浏览量"
-            value={totalViews}
+            value={s.totalViews}
             gradient="bg-gradient-to-br from-red-400 to-rose-500"
             icon={<svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>}
           />
@@ -156,65 +148,6 @@ export default function DashboardPage() {
 
       {/* 下方两栏 */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-        {/* 最近文章 */}
-        <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-800">最近文章</h3>
-            <Link to="/admin/posts" className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors">
-              查看全部 →
-            </Link>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {!stats ? (
-              // 骨架屏
-              [1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="flex items-center gap-4 px-5 py-3.5 animate-pulse">
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex-shrink-0" />
-                  <div className="flex-1 space-y-1.5">
-                    <div className="h-3.5 bg-gray-100 rounded w-3/4" />
-                    <div className="h-3 bg-gray-100 rounded w-1/4" />
-                  </div>
-                  <div className="h-5 w-14 bg-gray-100 rounded-full" />
-                  <div className="h-3 w-10 bg-gray-100 rounded" />
-                </div>
-              ))
-            ) : recentPosts.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 text-sm">暂无文章</div>
-            ) : (
-              recentPosts.map((post, i) => {
-                const st = STATUS_MAP[post.status] ?? STATUS_MAP.DRAFT;
-                const displayDate = post.publishedAt ?? post.createdAt ?? '未发布';
-                return (
-                  <div key={post.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/70 transition-colors">
-                    <span className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to={`/admin/posts/${post.id}/edit`}
-                        className="text-sm text-gray-800 font-medium truncate block hover:text-indigo-600 transition-colors"
-                      >
-                        {post.title}
-                      </Link>
-                      <p className="text-xs text-gray-400 mt-0.5">{displayDate}</p>
-                    </div>
-                    <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${st.cls}`}>
-                      {st.label}
-                    </span>
-                    <div className="flex-shrink-0 flex items-center gap-1 text-xs text-gray-400">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      {post.viewCount.toLocaleString()}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
 
         {/* 快捷操作 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
